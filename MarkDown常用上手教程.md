@@ -44,7 +44,7 @@
 
 ##### 本地图片插入
 
-![本地图片](D:\GitProjects\GitStudy\markdown.jpg)
+![本地图片](/markdown.jpg)
 
 ##### 远程图片插入
 
