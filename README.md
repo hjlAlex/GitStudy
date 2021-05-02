@@ -316,3 +316,52 @@ git pull origin 分支名称
 git fetch 远程别名	#例如git fetch origin
 ```
 
+#### 12，变基(rebase)
+
+**作用1：合并提交记录**(不要合并已经push到远程的提交记录)
+
+```shell
+#合并从当前head到15f745b(commit id)
+git rebase -i 15f745b
+或:
+#合并最近的三次提交
+git rebase -i HEAD~3
+```
+
+###### 执行这个命令后，会跳到一个vi编辑器里面的提示有：
+pick：保留该commit（缩写:p）
+reword：保留该commit，但我需要修改该commit的注释（缩写:r）
+edit：保留该commit, 但我要停下来修改该提交(不仅仅修改注释)（缩写:e）
+squash：将该commit和前一个commit合并（缩写:s）
+fixup：将该commit和前一个commit合并，但我不要保留该提交的注释信息（缩写:f）
+exec：执行shell命令（缩写:x）
+drop：我要丢弃该commit（缩写:d）
+
+##### 实操一下：
+
+###### 记录合并前
+
+![](/images/gitimage/git_rebase1.png)
+
+###### 现在希望合并HEAD最近的3条日志记录，执行命令`git rebase -i HEAD~3`，这个时候会弹出一个vi编辑器
+
+![](/images/gitimage/git_rebase2.png)
+
+###### 这里改成`squash`或者简写`s`，就是说我们希望把日志追加到前面的日志记录去，最后键入wq，保持退出。
+
+![](/images/gitimage/git_rebase3.png)
+
+###### 退出后来到这个窗口
+
+![](/images/gitimage/git_rebase4.png)
+
+###### 上面提示说，最终合并后的提交记录是这样的，但这样比较占空间，换了很多行，我们手动处理下，然后wq退出。
+
+![](/images/gitimage/git_rebase5.png)
+
+###### 最后用`git log`验证一下
+
+![](/images/gitimage/git_rebase6.png)
+
+###### 结果记录已经被合并。
+
