@@ -365,3 +365,80 @@ drop：我要丢弃该commit（缩写:d）
 
 ###### 结果记录已经被合并。
 
+**作用2:整合其他分支的修改(和merge相似，但除了能合并内容以外，rebase能在向远程分支推送时能保持提交历史的整洁)**
+
+###### 假如有如下例子:
+
+![](/images/gitimage/git_merge.png)
+
+###### 在C2节点的时候，我们新增了一个experiment分支出来，并产生了新的提交版本C4，同时原来的master分支也继续开发，也产生了新的版本C3，按照我们之前合并操作，我们希望把experiment分支的内容合并到master上，那么就需要切换回到master分支，然后执行合并命令，我们先回顾一下合并的过程，我们新增一个仓库RebaseMerge，就以上述图进行操作。
+
+![](/images/gitimage/rebase_merge1.png)
+
+###### 至此，在最新的C2节点，开始产生experiment分支，并在experiment分支提交新版本C4，然后切回master分支，提交新版本C3
+
+![](/images/gitimage/rebase_merge2.png)
+
+###### 好了，到这我们先看下各自的日志
+
+​		**master的日志**
+
+![](/images/gitimage/rebase_merge3.png)
+
+​	**experiment的日志**
+
+![](/images/gitimage/rebase_merge4.png)
+
+###### 最后切换回到master分支进行合并
+
+![](/images/gitimage/rebase_merge5.png)
+
+###### 以上为使用`git merge experiment`完成的合并过程。使用简单的`git log`命令展示的日志这样看不出有什么不好，但我们假如添加参数，让日志以图表的形式输出看下，使用命令`git log --graph --pretty`
+
+![](/images/gitimage/rebase_merge6.png)
+
+我们发现master分支在C3节点的时候产生了日志分支，因为这个时候合并了experiment分支过来，这样使得整个master分支的提交日志变得不清晰了(现在看起来只有一个分支还好，真实开发环境会存在很多分支到时候日志就会很混乱！)ps:上述日志分叉情况正是下图我们对合并的理解(C5节点其实就是上面的'合并experiment分支内容'对应的节点)
+
+![](/images/gitimage/rebase_merge7.png)
+
+###### OK，我们回到我们的目的，为了不让合并后的日志产生分叉，接下来`git rebase`就派上用场了。(为了保持环境一致，我们手动把当前仓库重置为合并前的环境)
+
+![](/images/gitimage/rebase_merge8.png)
+
+![](/images/gitimage/rebase_merge9.png)
+
+###### 好，接下来我们进行变基(为了模拟更加真实的情况，两个分支的新版本内容故意搞点冲突，就是C3和C4都修改了同一个文件f0.txt的同一个地方)，进行变基的过程第一步，先切换到experiment分支(这里和我们之前的merge步骤刚好反了过来，merge的第一步是切换到目标分支master，然后执行merge命令合并experiment内容，但这里不是哦)，然后执行`git rebase master`，意思是说 rebase 命令会将提交到master分支上的所有修改都移至另一分支experiment上。
+
+![image-20210503105646145](/images/gitimage/rebase_merge10.png)
+
+###### 但是这一步发生了冲突(其实这个跟我们merge的时候是一样的)，发生了冲突就要解决，然后使用命令`git rebase --continue`继续进行变基。
+
+![](/images/gitimage/rebase_merge11.png)
+
+###### 解决后
+
+![](/images/gitimage/rebase_merge12.png)
+
+###### 继续变基(记得先`git add .`把解决后的冲突放到暂存区，然后再执行git rebase --continue)，这个时候会弹出一个vi窗口，需要你填写解决合并冲突后的信息，这里默认就用最新C4
+
+![](/images/gitimage/rebase_merge13.png)
+
+###### 上面只是完成了变基的第一步，我们的目的是啥，我们的目的是要把experiment的内容都同步到master，并且master的日志看起来不要出现分叉，所以完成了上面的步骤后，我们接着回到master分支，最后执行`git merge experiment`即可完成。
+
+![](/images/gitimage/rebase_merge14.png)
+
+###### 最后使用图形化的日志输出检查master的提交日志
+
+![](/images/gitimage/rebase_merge15.png)
+
+###### 大功告成，nice！！！（这个时候你还会惊奇的发现，experiment分支也和master分支完全同步了，而且experiment的提交日志也不会出现分叉）
+
+![](/images/gitimage/rebase_merge16.png)
+
+###### 当前变基原理:首先找到这两个分支（即当前分支 experiment、变基操作的目标基底分支 master）的最近共同祖先 C2，然后对比当前分支相对于该祖先的历次提交，提取相应的修改并存为临时文件，然后将当前分支指向目标基底 C3, 最后以此将之前另存为临时文件的修改依次应用。
+
+![](/images/gitimage/rebase_merge17.png)
+
+###### 最后回到 master 分支，进行一次快进合并
+
+![](/images/gitimage/rebase_merge20.png)
