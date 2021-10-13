@@ -304,3 +304,472 @@ tsc index.ts
 
 #### 8，函数
 
+- ###### 和js的function语法一样，多了形参类型和返回值
+
+  ```typescript
+  function add(num1:number,num2:number): number {
+      return num1 + num2;
+  }
+  //或者
+  let add = function (num1:number,num2:number): number {
+      return num1 + num2;
+  }
+  ```
+
+- ###### 可选参数
+
+  ```typescript
+  function add(num1:number,num2:number,flag?:boolean): number {
+      if(flag){
+          //...
+      }
+      return num1 + num2;
+  }
+  ```
+
+- ###### 默认值
+
+  ```typescript
+  function add(num1:number,num2:number,flag:boolean = false): number {
+      if(flag){
+          //...
+      }
+      return num1 + num2;
+  }
+  ```
+
+- ###### 剩余参数(...操作)
+
+  ```typescript
+  function add(num1:number,num2:number,...args:any[]): number {
+      let sum = 0;
+      sum = sum + num1;
+      sum = sum + num2;
+      if(args && args.length > 0) {
+         	for(let i = 0;i < args.length; i++) {
+          	sum = sum + args[i];
+      	} 
+      }    
+      return sum;
+  }
+  ```
+
+- ###### 重载（先声明，后实现）
+
+  ![](/images/typescript/img8.png)
+
+- 箭头函数（es6语法）
+
+  ```typescript
+  //es5
+  setTimeout(function(){
+      //do something...
+      console.log(this);
+  },1000);
+  //es6
+  setTimeout(() => {
+      //do something...
+      console.log(this);
+  },1000);
+  ```
+
+  ###### ps:es6的箭头函数和es5的匿名函数，最大的区别在于箭头函数里面的this是当前上下文。
+
+  ![](/images/typescript/img9.png)
+
+#### 9，类
+
+- ###### es5类实现
+
+  ```typescript
+  function Person() {
+      this.name = "hjl";
+      this.age = 29;
+      this.showThis = function () {
+          console.log(this);
+      }
+  }
+  var p = new Person();
+  console.log(p.age);
+  //也可以原型链上进行定义
+  Person.prototype.sex = "男";
+  Person.prototype.work = function () {
+      console.log(this.name + "在工作");
+  }
+  p.showThis();
+  p.work();
+  ```
+
+  ###### 注意：原型链上进行扩展的属性和类会被所有的实例共享，而构造函数里面的属性和方法不会！！！
+
+- ###### es5静态方法
+
+  ###### 上面调用的方法是实例方法，都是需要经过new对象后进行调用的，而静态方法则不需要，直接类点出来调用
+
+  ```typescript
+  Person.staticMethod = function () {
+      console.log("staticMethod...");
+  }
+  Person.staticMethod();
+  ```
+
+- ###### es5继承(对象冒充继承和原型链继承)
+
+  ```typescript
+  //对象冒充继承
+  function Web() {
+      Person.call(this);//通过call实现对象冒充继承
+  }
+  var w = new Web();
+  console.log(w.name + w.age);
+  w.showThis();
+  w.work();//报错，work为Persion原型链上的方法，对象冒充继承获取不到
+  ```
+
+  ###### 对象冒充继承可以继承父级构造函数里面的属性和方法，但继承不了父级原型链上的属性和方法。
+
+  ```typescript
+  function Web2() {
+  }
+  Web2.prototype = new Person();
+  var w2 = new Web2();
+  console.log(w2.name + w2.age);// 正常
+  w2.showThis();// 正常
+  w2.work();// 正常
+  ```
+
+  ###### 原型链继承可以继承父级构造函数里面的属性和方法，也可以父级原型链上的属性和方法。
+
+  ###### 原型链接继承带来的问题
+
+  ```typescript
+  function Person(name, age) {
+      this.name = name;
+      this.age = age;
+      this.showThis = function () {
+          console.log(this);
+      }
+  }
+  Person.prototype.sex = "男";
+  Person.prototype.work = function () {
+      console.log(this.name + "在工作");
+  }
+  
+  function Web2(name, age) {
+  
+  }
+  Web2.prototype = new Person();//通过原型链继承
+  var w2 = new Web2("lm", 28);
+  w2.work();//输出   undefined在工作
+  ```
+
+  ###### 通过原型链继承的时候是没有办法从子类中传参数到父类的
+
+  ###### 所以，一般情况下是使用二者的组合模式，即对象冒充继承和原型链继承组合使用，上面的例子可以修改为：
+
+  ```typescript
+  function Person(name, age) {
+      this.name = name;
+      this.age = age;
+      this.showThis = function () {
+          console.log(this);
+      }
+  }
+  Person.prototype.sex = "男";
+  Person.prototype.work = function () {
+      console.log(this.name + "在工作");
+  }
+  
+  function Web2(name, age) {
+      Person.call(this, name, age);//通过call实现对象冒充继承
+  }
+  Web2.prototype = new Person();//或者Web2.prototype = Person.prototype;
+  var w2 = new Web2("lm", 28);
+  w2.work();//输出   lm在工作
+  ```
+
+- ###### TS（es6）的继承和接口
+
+  和java的语法大同小异，暂时跳过，emmm。。。
+
+- ###### TS的泛型
+
+  **函数泛型**
+
+  ```typescript
+  function getData<T>(value: T): T {
+      return value;
+  }
+  ```
+
+  **类泛型**
+
+  ```typescript
+  class MinClass<T>{
+      public list: T[];
+  
+      constructor() {
+          this.list = [];
+      }
+  
+      add(value: T): void {
+          this.list.push(value);
+      }
+  }
+  ```
+
+  **泛型接口**
+
+  ```typescript
+  //接口泛型1
+  interface ConfigFn {
+      <T>(value: T): T;
+  }
+  var getInfo: ConfigFn = function <T>(value: T): T {
+      return value;
+  }
+  //接口泛型2
+  interface ConfigFn2<T> {
+      (value: T): T;
+  }
+  var getInfo2 = function <T>(value: T): T {
+      return value;
+  }
+  var cf2: ConfigFn2<string> = getInfo2;
+  ```
+
+- ###### TS的export和import
+
+  **方式一**
+
+  ```typescript
+  //./modules/DB.ts
+  let url = "DB URL...";
+  export function getURL(): string {
+      return url;
+  }
+  export let username = "hjl";
+  export function save(): void {
+      console.log("save...");
+  }
+  ```
+
+  ```typescript
+  //引用
+  import { getURL, username, save } from './modules/DB';//注意后面不需要加ts后缀名
+  console.log(getURL());
+  console.log(username);
+  save();
+  ```
+
+  **方式二**
+
+  ```typescript
+  let url = "DB URL...";
+  function getURL(): string {
+      return url;
+  }
+  let username = "hjl";
+  function save(): void {
+      console.log("save...");
+  }
+  
+  export { getURL, username, save }
+  ```
+
+  ```typescript
+  //引用
+  import { getURL, username, save } from './modules/DB';//注意后面不需要加ts后缀名
+  console.log(getURL());
+  console.log(username);
+  save();
+  ```
+
+  **import** 和 **export**可以使用**as**来增加别名
+
+  **export default**
+
+  ###### export default只能在模块里面使用一次，而export可以使用多次，这个要注意，另外使用export default的时候，外面import的时候也有点区别，不需要加花括号
+
+  ```typescript
+  let url = "DB URL...";
+  function getURL(): string {
+      return url;
+  }
+  let username = "hjl";
+  function save(): void {
+      console.log("save...");
+  }
+  
+  export default getURL;//默认导出getURL
+  ```
+
+  ```typescript
+  //引用
+  import getURL from './modules/DB';//getURL不用加{}
+  console.log(getURL());
+  ```
+
+#### 10，装饰器
+
+###### 	装饰器是一种特殊类型的声明，它能够被附加都类声明，方法，属性，或者参数上，可以修改类的行为。
+
+###### 	通俗的讲，装饰器就是一个**方法**，可以注入到类、方法、属性参数上来扩展类、属性、参数的功能。
+
+###### 	常见的装饰器有：类装饰器，属性装饰器，方法装饰器，参数装饰器。
+
+###### 	装饰器的写法：普通装饰器（无法传参）、装饰器工厂（可传参）
+
+- ###### 	类普通装饰器（无法传参）
+
+  ```typescript
+  //类修饰器方法定义
+  function decorationFn(target: any): void {
+      //target为修饰的类的定义
+      console.log("修饰器...", target);
+  }
+  
+  @decorationFn
+  class A {
+      name: string;
+      constructor(name: string) {
+          this.name = name;
+          console.log("A的构造函数...");
+      }
+      showInfo(): void {
+          console.log(this.name);
+      }
+  }
+  new A("黄杰龙");
+  ```
+
+  ###### 执行结果
+
+  ![](/images/typescript/img10.png)
+
+- ###### 类装饰器工厂（可传参）
+
+  ```typescript
+  function decorationFn(param: any): Function {
+      return function (target: any) {
+          console.log("修饰器获取参数...", param);
+          console.log("修饰器...", target);
+      }
+  }
+  
+  @decorationFn("hjl")
+  class A {
+      name: string;
+      constructor(name: string) {
+          this.name = name;
+          console.log("A的构造函数...");
+      }
+      showInfo(): void {
+          console.log(this.name);
+      }
+  }
+  new A("黄杰龙");
+  ```
+
+  ###### 执行结果
+
+  ![](/images/typescript/img11.png)
+
+  ###### 特别1，我们还可以改类装饰器目标类的原型链
+
+  ```typescript
+  function decorationFn(param: any): Function {
+      return function (target: any) {
+          console.log("修饰器获取参数...", param);
+          console.log("修饰器...", target);
+          //因为target为修饰类的定义，我们甚至还可以改上面的原型链
+          target.prototype.exp = "exp params...";
+      }
+  }
+  
+  @decorationFn("hjl")
+  class A {
+      name: string;
+      constructor(name: string) {
+          this.name = name;
+          console.log("A的构造函数...");
+      }
+      showInfo(): void {
+          console.log(this.name);
+      }
+  }
+  let aaa: any = new A("黄杰龙");
+  console.log(aaa.exp);
+  ```
+
+  ###### 执行结果
+
+  ![](/images/typescript/img12.png)
+
+  ###### 特别2，我们还可以重载目标类的构造函数
+
+  ```typescript
+  function decorationClass(target: any): any {
+      return class C extends target {//class 最终也是 function，装饰器最终还是一个function，记住这个点
+          constructor(name: string) {
+              super(name);
+              console.log("C的构造函数...");
+          }
+      }
+  }
+  
+  @decorationClass
+  class B {
+      name: string;
+      constructor(name: string) {
+          this.name = name;
+          console.log("B的构造函数...");
+      }
+      showInfo(): void {
+          console.log(this.name);
+      }
+  }
+  let bbb: any = new B("黄杰龙");
+  ```
+
+  ###### 执行结果
+
+  ![](/images/typescript/img13.png)
+
+- ###### 属性装饰器
+
+  ###### 注意属性装饰器获取的参数和类装饰器的区别，特别是target，类装饰器target为目标类的定义，属性装饰器为目标类的原型对象实例。
+
+  ```typescript
+  function decorationClass(...args: any[]): void {
+      console.log(args);
+  }
+  
+  function decorationProp(defaultValue: string): Function {
+      return function (target: any, prop: string) {
+          target[prop] = defaultValue;
+          console.log(target, prop);
+      }
+  }
+  
+  @decorationClass
+  class D {
+      @decorationProp("默认url")
+      url: string | undefined;
+      name: string | undefined;
+  }
+  ```
+
+  ###### 执行结果
+
+  ![](/images/typescript/img14.png)
+
+  ###### ps:属性装饰器先执行，然后再到类装饰器
+
+- ###### 各装饰器执行顺序
+
+  **属性装饰器>方法装饰器>方法参数装饰器>类装饰器**
+
+  **同级下，装饰器后面>前面**
+
+  
